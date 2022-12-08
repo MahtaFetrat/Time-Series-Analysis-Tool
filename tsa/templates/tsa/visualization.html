@@ -1,20 +1,49 @@
 {% load static %}
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/visualization.css' %}">
 
-<table style="width:100%" class="ui table">
-    <tr>
-        {% for e in request.session.df %}
-            {% if forloop.counter < 5 %}
-            <td>{{ e }}</td>
-            {% endif %}
-        {% endfor %}
-        <td>.</td>
-        <td>.</td>
-        <td>.</td>
-        {% for e in request.session.df %}
-            {% if forloop.counter > request.session.df|length|add:-5 %}
-            <td>{{ e }}</td>
-            {% endif %}
-        {% endfor %}
-    </tr>
-</table>
+<div class="table-container">
+    <table class="ui teal table" style="width: 75%">
+        <thead>
+            <tr>
+                {% for index in start_indices %}
+                    <th class="center aligned">{{ index }}</th>
+                {% endfor %}
+                    <th class="center aligned dots">. . .</th>
+                {% for index in end_indices %}
+                    <th class="center aligned">{{ index }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for data in start_data %}
+                    <td class="center aligned">{{ data }}</td>
+                {% endfor %}
+                    <td class="center aligned dots">. . .</td>
+                {% for data in end_data %}
+                    <td class="center aligned">{{ data }}</td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="table-container">
+    <table class="ui teal table" style="width: 75%">
+        <thead>
+            <tr>
+                {% for key in summary.keys %}
+                    <th class="center aligned">{{ key }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for value in summary.values %}
+                    <td class="center aligned">{{ value }}</td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+</div>
