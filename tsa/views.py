@@ -2,6 +2,8 @@ from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 from tsa.forms import UploadFileForm
 import pandas as pd
+import matplotlib.pyplot as plt
+from io import StringIO
 
 # Create your views here.
 
@@ -41,3 +43,18 @@ class VisualizationView(TemplateView):
         summary = data.describe().to_dict()
         summary = {k: round(v, 2) for k, v in summary.items()}
         context['summary'] = summary
+
+    def set_context_plot(self, context):
+        data = pd.Series(self.request.session.get('data'))
+
+        figure = plt.figure()
+        plt.plot(data)
+
+        image_data = StringIO()
+        figure.savefig(image_data, format='svg')
+        image_data.seek(0)
+
+        plot = image_data.getvalue()
+
+        context['plot'] = plot
+
