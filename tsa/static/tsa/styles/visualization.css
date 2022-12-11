@@ -1,7 +1,28 @@
+.title {
+    font-size: 4em;
+    text-align: center;
+    font-weight: bolder;
+    margin-top: 60px;
+    margin-bottom: 60px;
+    padding-top: 20px;
+}
+
+#plot {
+    height: 260pt;
+}
+
+.title2 {
+    font-size: 2em;
+    font-weight: bolder;
+    text-align: center;
+    margin: 80px;
+    padding-top: 50px;
+}
+
 .table-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 50px;
 }
 
 tr  {
@@ -14,4 +35,8 @@ td {
 
 .dots {
     width: 100%;
+}
+
+.row-title {
+    font-weight: bold;
 }
