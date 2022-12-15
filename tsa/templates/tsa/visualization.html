@@ -2,12 +2,6 @@
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/visualization.css' %}">
 
-<style>
-    body {
-        color: #090138;
-    }
-</style>
-
 <div class="title">Visualizing the "{{ title|truncatechars:20 }}" Dataset!</div>
 
 <div id="plot">
@@ -17,7 +11,7 @@
 <div class="title2">You can see a few starting and ending data points here!</div>
 
 <div class="table-container">
-    <table class="ui blue table" style="width: 75%">
+    <table class="ui teal table" style="width: 75%">
         <thead>
             <tr>
                 {% for index in start_indices %}
@@ -46,7 +40,7 @@
 <div class="title2">Want to find out more? Here is the data summary!</div>
 
 <div class="table-container">
-    <table class="ui celled definition blue table" style="width: 25%; margin-bottom: 60px;">
+    <table class="ui celled definition teal table" style="width: 25%; margin-bottom: 60px;">
         <thead>
         </thead>
         <tbody>
