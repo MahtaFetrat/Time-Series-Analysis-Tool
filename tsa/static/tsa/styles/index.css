@@ -42,3 +42,9 @@ form {
 .spaceleft {
     margin-left: 1em;
 }
+
+#errors {
+    color: lightcoral;
+    display: flex;
+    justify-content: center;
+}
