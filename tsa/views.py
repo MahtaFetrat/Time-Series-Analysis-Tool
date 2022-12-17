@@ -4,6 +4,7 @@ from tsa.forms import UploadFileForm
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import StringIO
+import numpy as np
 
 # Create your views here.
 
@@ -13,13 +14,15 @@ class IndexView(FormView):
     success_url = 'visualization/'
 
     def form_valid(self, form):
+        print(self.request.FILES['file'])
         df = pd.read_csv(self.request.FILES['file'])
+        self.request.session['title'] = form.cleaned_data['title']
         self.request.session['data'] = df.iloc[:, 0].tolist()
         return super().form_valid(form)
 
 
 class VisualizationView(TemplateView):
-    PREVIEW_COUNT = 5
+    PREVIEW_COUNT = 8
     template_name = "tsa/visualization.html"
 
     def get_context_data(self, **kwargs):
@@ -27,6 +30,7 @@ class VisualizationView(TemplateView):
         self.set_context_datapoints(context)
         self.set_context_summary(context)
         self.set_context_plot(context)
+        context['title'] = self.request.session['title']
         
         return context
 
@@ -47,14 +51,15 @@ class VisualizationView(TemplateView):
     def set_context_plot(self, context):
         data = pd.Series(self.request.session.get('data'))
 
-        figure = plt.figure()
-        plt.plot(data)
+        fig, ax = plt.subplots(1, figsize=(15, 4))
+        lenght = len(data)
+        ax.plot(np.arange(lenght), data, c=np.random.choice(['olive', 'hotpink', 'turquoise', 'firebrick', 'navy', 'goldenrod']))
+        ax.set_xticks(data.index)
+        ax.set_xlabel("Time Steps")
+        ax.set_ylabel("Value")
+        ax.set_title("TIme Series Plot")
 
-        image_data = StringIO()
-        figure.savefig(image_data, format='svg')
-        image_data.seek(0)
-
-        plot = image_data.getvalue()
-
-        context['plot'] = plot
-
+        image_file = StringIO()
+        fig.savefig(image_file, format='svg')
+        image_file.seek(0)
+        context['plot'] = image_file.getvalue()

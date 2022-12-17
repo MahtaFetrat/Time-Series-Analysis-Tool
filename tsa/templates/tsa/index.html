@@ -1,5 +1,41 @@
-<form action="" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit">
-</form>
+
+{% load static %}
+
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'tsa/styles/index.css' %}">
+<style>
+    body {
+        height: 100%;
+        background-image: url({% static 'tsa/images/index-bg.gif' %});
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+    }
+</style>
+
+<div id="page-container">
+    <div id="title">Time Series Analysis Tool</div>
+
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="field-container">
+            {% for field in form %}
+                {% if field.name == 'title' %}
+                    <label>{{ field.label }}:</label>
+                    <div class="ui input spaceleft">
+                        {{ field }}
+                    </div>
+                {% else %} 
+                    <div class=spaceleft>
+                        {{ field }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <input type="submit" value="Submit" class="ui button">
+        </div>
+    </form>
+    <div id="errors">
+        {{ form.non_field_errors }}
+    </div>
+</div>
