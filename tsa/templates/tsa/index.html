@@ -3,6 +3,15 @@
 
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'tsa/styles/index.css' %}">
+
+<script>
+    function set_loading(event) {
+        if (document.getElementById("id_title").value != "" && document.getElementById("id_file").value != "") {
+            event.classList.add('loading', 'disabled');
+        }
+    };
+</script>
+
 <style>
     body {
         height: 100%;
@@ -32,7 +41,9 @@
                     </div>
                 {% endif %}
             {% endfor %}
-            <input type="submit" value="Submit" class="ui button">
+            <button style="background: none; border: none;" onclick="set_loading(this)" class="ui button">
+                <input type="submit" value="Submit" class="ui button">
+            </button>
         </div>
     </form>
     <div id="errors">

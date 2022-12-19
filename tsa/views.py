@@ -8,6 +8,7 @@ import numpy as np
 from pmdarima.arima import auto_arima
 from statsmodels.tsa.arima.model import ARIMA
 
+
 # Create your views here.
 
 class IndexView(FormView):
