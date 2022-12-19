@@ -73,6 +73,7 @@ class VisualizationView(TemplateView):
 class TSAModelView(TemplateView):
     # TODO: threading
     # TODO: separate service
+    # TODO: refactor :)
 
     template_name = "tsa/model.html"
 
@@ -80,11 +81,17 @@ class TSAModelView(TemplateView):
         context = super().get_context_data(**kwargs)
         y = self.request.session.get('data')
 
-        model = self.get_auto_arima_model(y)
+        model, search_output = self.get_auto_arima_model(y)
         self.set_contex_prediction_plot(y, model, context)
+        self.set_context_search_result(search_output, context)
         return context
         
     def get_auto_arima_model(self, y):
+        import sys
+        stdout = sys.stdout
+        temp_out = StringIO()
+        sys.stdout = temp_out
+
         auto_arima_model = auto_arima(
             y, 
             start_p=0,
@@ -99,10 +106,13 @@ class TSAModelView(TemplateView):
             seasonal=False,
             stepwise=False
         )
+
+        sys.stdout = stdout
+        temp_out.seek(0)
+        search_output = temp_out.read()
+
         model = ARIMA(y, order=auto_arima_model.get_params()['order']).fit()
-        # print("***********************\n")
-        # print(model.get_forecast(1).conf_int(alpha=0.05))
-        return model
+        return model, search_output
         
     
     def set_contex_prediction_plot(self, y, model, context):
@@ -130,3 +140,6 @@ class TSAModelView(TemplateView):
         fig.savefig(image_file, format='svg')
         image_file.seek(0)
         context['prediction_plot'] = image_file.getvalue()
+
+    def set_context_search_result(self, search_output, context):
+        context['search_output'] = search_output
