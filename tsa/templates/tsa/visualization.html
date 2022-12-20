@@ -54,7 +54,7 @@
             {% for key, value in summary.items %}
                 <tr>
                     <td class="center aligned row-title">{{ key }}</td>
-                    <td class="center aligned">{{ value }}</td>
+                    <td class="center aligned">{{ value|floatformat:2 }}</td>
                 </tr>
             {% endfor %}
         </tbody>

@@ -5,11 +5,9 @@ import numpy as np
 from pmdarima.arima import auto_arima
 from statsmodels.tsa.arima.model import ARIMA
 import sys
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.stats.diagnostic import acorr_ljungbox
 
-def get_data_summary(data):
-    ROUND = 2
-    summary = data.describe().to_dict()
-    return {k: round(v, ROUND) for k, v in summary.items()}
 
 def get_start_end_points_dict(data, count):
     start_end_points = {}
@@ -98,8 +96,6 @@ def get_actual_prediction_data_dict(data, model, actual_count, prediction_count)
     lenght = len(data)
     predictions = model.predict(lenght + 1, lenght + prediction_count)
 
-    print(type(data))
-    print(type(predictions))
     data_points = data[-actual_count:] + list(predictions)
     actual_prediction_data_dic["data"] = data_points
     actual_prediction_data_dic["indices"] = np.arange(lenght - actual_count, lenght + prediction_count)
@@ -107,3 +103,41 @@ def get_actual_prediction_data_dict(data, model, actual_count, prediction_count)
     actual_prediction_data_dic["prediction_count"] = prediction_count
     
     return actual_prediction_data_dic
+
+
+def get_model_acf_plot_image(residuals, lag_number):
+    fig, ax = plt.subplots(1, figsize=(15, 4))
+
+    plot_acf(residuals, lags=lag_number if lag_number < len(residuals) else len(residuals) - 1, ax=ax)
+
+    image_file = StringIO()
+    fig.savefig(image_file, format='svg')
+    image_file.seek(0)
+    return image_file.getvalue()
+
+
+def get_model_error_density_plot_image(residuals):
+    fig, ax = plt.subplots(1, figsize=(15, 4))
+
+    residuals.plot(
+        ax=ax,
+        kind='kde',
+        title='ARIMA Fit Residual Error Density Plot',
+        xlabel='Residual Values',
+        grid=True,
+    )
+
+    image_file = StringIO()
+    fig.savefig(image_file, format='svg')
+    image_file.seek(0)
+    return image_file.getvalue()
+
+
+def get_model_normality_test(residuals):
+    test_res_dict = {}
+
+    pvalues = acorr_ljungbox(residuals, lags= 10)['lb_pvalue'].to_numpy()
+    test_res_dict["pvalues"] = pvalues
+    test_res_dict["independence"] = "Independent" if np.all(pvalues >= 0.05) else "Not Independent"
+
+    return test_res_dict

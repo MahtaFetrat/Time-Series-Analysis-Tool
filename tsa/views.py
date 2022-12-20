@@ -2,8 +2,8 @@ from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 from tsa.forms import UploadFileForm
 import pandas as pd
-from tsa.serivces import get_data_plot_image, get_auto_arima_model, get_prediction_plot_image, get_data_summary, get_start_end_points_dict, get_actual_prediction_data_dict
-
+from tsa.serivces import get_data_plot_image, get_auto_arima_model, get_prediction_plot_image, get_start_end_points_dict, get_actual_prediction_data_dict, get_model_acf_plot_image, get_model_error_density_plot_image, get_model_normality_test
+import matplotlib.pyplot as plt
 
 class IndexView(FormView):
     template_name = 'tsa/index.html'
@@ -23,11 +23,12 @@ class VisualizationView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = self.request.session['title']
+
         data = pd.Series(self.request.session.get('data'))
         context.update(get_start_end_points_dict(data, self.PREVIEW_COUNT))
-        context['summary'] = get_data_summary(data)
+        context['summary'] = data.describe().to_dict()
         context['plot'] = get_data_plot_image(data)
-        context['title'] = self.request.session['title']
         
         return context
 
@@ -39,10 +40,29 @@ class TSAModelView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['title'] = self.request.session['title']
+
         data = self.request.session.get('data')
 
         model, search_output = get_auto_arima_model(data)
+        self.request.session['residuals'] = list(model.resid)
         context['search_output'] = search_output
         context['prediction_plot'] = get_prediction_plot_image(data, model)
         context.update(get_actual_prediction_data_dict(data, model, self.ACTUAL_PREVIEW_COUNT, self.PREDICTION_PREVIEW_COUT))
+        return context
+
+
+class ModelDiagnosticsView(TemplateView):
+    template_name = "tsa/diagnostics.html"
+    LAG_NUMBER = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.request.session['title']
+
+        residuals = pd.Series(self.request.session.get('residuals'))
+        context["summary"] = residuals.describe().to_dict()
+        context["acf_plot"] = get_model_acf_plot_image(residuals, self.LAG_NUMBER)
+        context["error_density_plot"] = get_model_error_density_plot_image(residuals)
+        context.update(get_model_normality_test(residuals))
         return context
