@@ -2,6 +2,13 @@
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/visualization.css' %}">
 
+<script>
+    function set_loading(event) {
+        event.classList.add('loading', 'disabled');
+        document.getElementById('loading-text').style.visibility = "visible";
+    };
+</script>
+
 <div class="title">Visualizing the "{{ title|truncatechars:20 }}" Dataset!</div>
 
 <div id="plot">
@@ -55,5 +62,8 @@
 </div>
 
 <div id="model-btn">
-    <a class="ui button" href="{% url 'tsa_model' %}">Create Time Series Analysis Model</a>
+    <a class="ui button" href="{% url 'tsa_model' %}" onclick="set_loading(this)">
+        Create Time Series Analysis Model
+    </a>
+    <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>
 </div>
