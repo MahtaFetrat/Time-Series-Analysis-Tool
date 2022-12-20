@@ -2,7 +2,7 @@
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/diagnostics.css' %}">
 
-<div class="title">Evaluating the tsa model built for the "{{ title|truncatechars:20 }}" Dataset!</div>
+<div class="title">Evaluating the TSA Model Built for the "{{ title|truncatechars:20 }}" Dataset!</div>
 
 
 <div class="title2">You can see the residuals summary here!</div>
@@ -43,3 +43,5 @@
         result: <span style="color: {%if independence == 'Indepentend' %} red {% else %} lime {% endif %};">{{ independence }}</span>
     </div>
 </div>
+
+<div class="title2" style="padding: 80px;">Thank you for using the TSA Analysis Tool :)</div>

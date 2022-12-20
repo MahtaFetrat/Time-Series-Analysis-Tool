@@ -9,9 +9,9 @@
     };
 </script>
 
-<div class="title">Visualizing the "{{ title|truncatechars:20 }}" Dataset!</div>
+<div class="title">View Preprocessing Steps on the "{{ title|truncatechars:20 }}" Dataset!</div>
 
-<div id="plot">
+<!-- <div id="plot">
     {{ plot|safe }}
 </div>
 
@@ -59,11 +59,11 @@
             {% endfor %}
         </tbody>
     </table>
-</div>
+</div> -->
 
 <div id="model-btn">
-    <a class="ui button" href="{% url 'preprocess' %}" onclick="set_loading(this)">
-        View Data Preprocessing
+    <a class="ui button" href="{% url 'tsa_model' %}" onclick="set_loading(this)">
+        Create Time Series Analysis Model
     </a>
     <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>
 </div>

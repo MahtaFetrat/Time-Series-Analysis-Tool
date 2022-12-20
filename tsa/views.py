@@ -33,6 +33,18 @@ class VisualizationView(TemplateView):
         return context
 
 
+class PreprocessingView(TemplateView):
+    template_name = "tsa/preprocess.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.request.session['title']
+
+        data = self.request.session.get('data')
+
+        return context
+
+
 class TSAModelView(TemplateView):
     template_name = "tsa/model.html"
     ACTUAL_PREVIEW_COUNT = 8

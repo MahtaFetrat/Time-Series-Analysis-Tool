@@ -24,7 +24,6 @@
 #output-container {
     display: flex;
     justify-content: center;
-    padding-bottom: 80px;
 }
 
 #plot {
