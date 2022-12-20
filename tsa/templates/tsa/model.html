@@ -1,3 +1,67 @@
-{{ prediction_plot|safe }}
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/model.css' %}">
 
-{{ search_output | linebreaks }}
+<script>
+    function set_loading(event) {
+        event.classList.add('loading', 'disabled');
+        document.getElementById('loading-text').style.visibility = "visible";
+    };
+</script>
+
+<div class="title">Building the TSA model for the "{{ title|truncatechars:20 }}" Dataset!</div>
+
+<div class="title2">This is how we searched for the best model!</div>
+
+<div id="search-res-container">
+    <div id="search-res">
+        {{ search_output | linebreaks }}
+    </div>
+</div>
+
+<div class="title2">See the fit and the forecasts of the model here!</div>
+
+<div id="plot">
+    {{ prediction_plot|safe }}
+</div>
+
+<div class="title2">You can see a few ending points of the series here!</div>
+
+<div class="table-container">
+    <table class="ui table definition" style="width: 75%">
+        <thead>
+            <tr>
+                <th style="border-top: none; border-left: none;"></th>
+                <th class="center aligned head-border right-border" colspan="{{ actual_count }}">Actual Data Points</th>
+                <th class="center aligned" colspan="{{ prediction_count }}">Model Predictions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="center aligned">Index</td>
+                {% for index in indices %}
+                    <td class="center aligned {% if forloop.counter == actual_count %} right-border {% endif %}">{{ index }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td class="center aligned">Value</td>
+                {% for data in data %}
+                    <td class="center aligned {% if forloop.counter == actual_count %} right-border {% endif %}">{{ data|floatformat:2 }}</td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'tsa_model' %}" onclick="set_loading(this)">
+        See model diagnosis
+    </a>
+    <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>
+</div>
+
+
+
+
+
+ -->

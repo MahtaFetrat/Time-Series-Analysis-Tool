@@ -67,12 +67,12 @@ def get_prediction_plot_image(data, model):
     NUM_OF_FORECASTS = 5
         
     lenght = len(data)
-    predictions = model.predict(1, lenght + NUM_OF_FORECASTS - 1)
+    predictions = model.predict(1, lenght + NUM_OF_FORECASTS)
 
-    conf = model.get_forecast(NUM_OF_FORECASTS - 1).conf_int(alpha=0.05)
+    conf = model.get_forecast(NUM_OF_FORECASTS).conf_int(alpha=0.05)
     conf = np.insert(conf, 0, np.array([predictions[lenght - 1], predictions[lenght - 1]]), 0)
 
-    forecast_index = np.arange(lenght - 1, lenght + NUM_OF_FORECASTS - 1)
+    forecast_index = np.arange(lenght - 1, lenght + NUM_OF_FORECASTS)
     lower_series = pd.Series(conf[:, 0], index=forecast_index)
     upper_series = pd.Series(conf[:, 1], index=forecast_index)
 
@@ -81,6 +81,8 @@ def get_prediction_plot_image(data, model):
     ax.plot(data, label='Actual')
     ax.plot(predictions, label='Predictions')
     ax.fill_between(lower_series.index, lower_series, upper_series, color='k', alpha=.15)
+    ax.set_xticks(np.arange(lenght + NUM_OF_FORECASTS))
+
     ax.set_title('Predictions vs Actuals')
     ax.legend(loc="upper left")
 
@@ -88,3 +90,20 @@ def get_prediction_plot_image(data, model):
     fig.savefig(image_file, format='svg')
     image_file.seek(0)
     return image_file.getvalue()
+
+
+def get_actual_prediction_data_dict(data, model, actual_count, prediction_count):
+    actual_prediction_data_dic = {}
+
+    lenght = len(data)
+    predictions = model.predict(lenght + 1, lenght + prediction_count)
+
+    print(type(data))
+    print(type(predictions))
+    data_points = data[-actual_count:] + list(predictions)
+    actual_prediction_data_dic["data"] = data_points
+    actual_prediction_data_dic["indices"] = np.arange(lenght - actual_count, lenght + prediction_count)
+    actual_prediction_data_dic["actual_count"] = actual_count
+    actual_prediction_data_dic["prediction_count"] = prediction_count
+    
+    return actual_prediction_data_dic

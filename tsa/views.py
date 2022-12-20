@@ -2,7 +2,7 @@ from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 from tsa.forms import UploadFileForm
 import pandas as pd
-from tsa.serivces import get_data_plot_image, get_auto_arima_model, get_prediction_plot_image, get_data_summary, get_start_end_points_dict
+from tsa.serivces import get_data_plot_image, get_auto_arima_model, get_prediction_plot_image, get_data_summary, get_start_end_points_dict, get_actual_prediction_data_dict
 
 
 class IndexView(FormView):
@@ -34,6 +34,8 @@ class VisualizationView(TemplateView):
 
 class TSAModelView(TemplateView):
     template_name = "tsa/model.html"
+    ACTUAL_PREVIEW_COUNT = 8
+    PREDICTION_PREVIEW_COUT = 5
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -42,4 +44,5 @@ class TSAModelView(TemplateView):
         model, search_output = get_auto_arima_model(data)
         context['search_output'] = search_output
         context['prediction_plot'] = get_prediction_plot_image(data, model)
+        context.update(get_actual_prediction_data_dict(data, model, self.ACTUAL_PREVIEW_COUNT, self.PREDICTION_PREVIEW_COUT))
         return context
