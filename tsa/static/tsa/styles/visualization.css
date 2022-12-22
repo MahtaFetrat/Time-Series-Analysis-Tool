@@ -59,3 +59,12 @@ td {
     pointer-events: none;
     cursor: default;
 }
+
+.title3 {
+    font-size: 4em;
+    text-align: center;
+    font-weight: bolder;
+    padding-top: 150px;
+    margin-bottom: 80px;
+    color: rgb(0, 86, 86);;   
+}

@@ -2,8 +2,29 @@
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/diagnostics.css' %}">
 
-<div class="title">Evaluating the TSA Model Built for the "{{ title|truncatechars:20 }}" Dataset!</div>
+{% if not title %}
 
+<div class="title3">You must upload a dataset first!</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'index' %}">
+        Back to Home Page
+    </a>
+</div>
+
+{% elif not summary %}
+
+<div class="title3">You must create a model first!</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'tsa_model' %}">
+        Back to Model Page
+    </a>
+</div>
+
+{% else %}
+
+<div class="title">Evaluating the TSA Model Built for the "{{ title|truncatechars:20 }}" Dataset!</div>
 
 <div class="title2">You can see the residuals summary here!</div>
 
@@ -51,3 +72,5 @@
         Back to Home Page
     </a>
 </div>
+
+{% endif %}

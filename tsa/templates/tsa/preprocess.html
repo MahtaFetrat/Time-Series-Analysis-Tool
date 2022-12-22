@@ -9,6 +9,18 @@
     };
 </script>
 
+{% if not title %}
+
+<div class="title3">You must upload a dataset first!</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'index' %}">
+        Back to Home Page
+    </a>
+</div>
+
+{% else %}
+
 <div class="title">View Preprocessing Steps on the "{{ title|truncatechars:20 }}" Dataset!</div>
 
 <div class="title2">You can see some useful stationarity checks on the data bellow!</div>
@@ -37,3 +49,5 @@
     </a>
     <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>
 </div>
+
+{% endif %}

@@ -9,6 +9,18 @@
     };
 </script>
 
+{% if not title %}
+
+<div class="title3">You must upload a dataset first!</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'index' %}">
+        Back to Home Page
+    </a>
+</div>
+
+{% else %}
+
 <div class="title">Building the TSA Model for the "{{ title|truncatechars:20 }}" Dataset!</div>
 
 <div class="title2">This is how we searched for the best model!</div>
@@ -59,3 +71,5 @@
     </a>
     <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>
 </div>
+
+{% endif %}
