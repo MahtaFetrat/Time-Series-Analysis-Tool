@@ -2,8 +2,8 @@ from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 from tsa.forms import UploadFileForm
 import pandas as pd
-from tsa.serivces import get_data_plot_image, get_auto_arima_model, get_prediction_plot_image, get_start_end_points_dict, get_actual_prediction_data_dict, get_model_acf_plot_image, get_model_error_density_plot_image, get_model_normality_test
-import matplotlib.pyplot as plt
+from tsa.serivces import get_data_plot_image, get_auto_arima_model, get_prediction_plot_image, get_start_end_points_dict, get_actual_prediction_data_dict, get_model_acf_plot_image, get_model_error_density_plot_image, get_model_normality_test, get_stationarity_check_series, get_acf_pacf_plot_image
+
 
 class IndexView(FormView):
     template_name = 'tsa/index.html'
@@ -35,13 +35,16 @@ class VisualizationView(TemplateView):
 
 class PreprocessingView(TemplateView):
     template_name = "tsa/preprocess.html"
+    LAG_NUMBER = 20
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = self.request.session['title']
 
         data = self.request.session.get('data')
-
+        stationarity_checks, differenced_data = get_stationarity_check_series(data)
+        context["stationarity_checks"] = stationarity_checks
+        context["acf_pacf"] = get_acf_pacf_plot_image(differenced_data, self.LAG_NUMBER)
         return context
 
 

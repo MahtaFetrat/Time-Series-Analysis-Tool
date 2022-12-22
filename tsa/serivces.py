@@ -6,7 +6,9 @@ from pmdarima.arima import auto_arima
 from statsmodels.tsa.arima.model import ARIMA
 import sys
 from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.graphics.tsaplots import plot_pacf
 from statsmodels.stats.diagnostic import acorr_ljungbox
+from statsmodels.tsa.stattools import adfuller
 
 
 def get_start_end_points_dict(data, count):
@@ -141,3 +143,76 @@ def get_model_normality_test(residuals):
     test_res_dict["independence"] = "Independent" if np.all(pvalues >= 0.05) else "Not Independent"
 
     return test_res_dict
+
+
+def get_differencing_plot(data, i):
+    fig, axs = plt.subplots(1, 2, figsize=(20, 2.5))
+
+    ax = axs[0]
+    lenght = len(data)
+    ax.plot(np.arange(lenght), data, c=np.random.choice(['olive', 'hotpink', 'turquoise', 'firebrick', 'navy', 'goldenrod']))
+    ax.set_xticks(np.arange(lenght))
+    ax.set_xlabel("Index")
+    ax.set_ylabel("Differenced Values")
+    ax.set_title(f"Order {i} Differenced Data")
+
+    plot_acf(data, lags=10, ax=axs[1])
+
+    image_file = StringIO()
+    fig.savefig(image_file, format='svg')
+    image_file.seek(0)
+
+    return image_file.getvalue()
+
+
+def get_adf_test_output(data):
+    output = f"Std of the differenced series: {np.std(data)}"
+
+    result = adfuller(data)
+
+    output += f'ADF Statistic: {result[0]}\n'
+    output += f'p-value: {result[1]}\n'
+    output += f'Critical Values:\n'
+    for key, value in result[4].items():
+        output += f'\t{key}: {value:.3f}\n'
+
+    stationary = (result[1] <= 0.05) & (result[4]['5%'] > result[0])
+    stationary = "Stationary" if stationary else "Non-stationary"
+
+    return output, stationary
+
+
+def get_stationarity_check_series(data):
+    data = pd.Series(data)
+
+    stationarity_plot_series = []
+    stationarity_test_output_series = []
+    stationarity_test_result_series = []
+
+    for i in range(11):
+        stationarity_plot_series.append(get_differencing_plot(data, i))
+        test_out, test_res = get_adf_test_output(data)
+        stationarity_test_output_series.append(test_out)
+        stationarity_test_result_series.append(test_res)
+        if test_res == "Stationary":
+            break
+    
+        data = data.diff().fillna(0)
+
+    stationarity_checks = zip(stationarity_plot_series, stationarity_test_output_series, stationarity_test_result_series)
+    
+    return stationarity_checks, data
+
+
+def get_acf_pacf_plot_image(data ,lag_number):
+    fig, axs = plt.subplots(1, 2, figsize=(20, 4))
+
+    length = len(data)
+    plot_acf(data, lags=lag_number if lag_number < length else length - 1, ax=axs[0])
+    plot_pacf(data, lags=lag_number if lag_number < length/2 else length/2 - 1, ax=axs[1], method="ywm")
+        
+    image_file = StringIO()
+    fig.savefig(image_file, format='svg')
+    image_file.seek(0)
+
+    return image_file.getvalue()

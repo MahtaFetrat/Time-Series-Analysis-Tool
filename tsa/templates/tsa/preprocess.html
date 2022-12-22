@@ -1,6 +1,6 @@
 {% load static %}
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
-<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/visualization.css' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/preprocess.css' %}">
 
 <script>
     function set_loading(event) {
@@ -11,55 +11,25 @@
 
 <div class="title">View Preprocessing Steps on the "{{ title|truncatechars:20 }}" Dataset!</div>
 
-<!-- <div id="plot">
-    {{ plot|safe }}
+<div class="title2">You can see some useful stationarity checks on the data bellow!</div>
+
+{% for plot, test_output, test_res in stationarity_checks %}
+    <div id="plot">
+        {{ plot|safe }}
+    </div>
+    <div id="output-container">
+        <div id="output">
+            {{ test_output | linebreaks }}
+            <div style="color: {%if test_res == 'Stationary' %} lime {% else %} red {% endif %};">{{ test_res }}</div>
+        </div>
+    </div>
+{% endfor %}
+
+<div class="title2">You can see the ACF and PACF plots of the differenced data here!</div>
+
+<div id="plot">
+    {{ acf_pacf | safe }}
 </div>
-
-<div class="title2">You can see a few starting and ending data points here!</div>
-
-<div class="table-container">
-    <table class="ui teal table" style="width: 75%">
-        <thead>
-            <tr>
-                {% for index in start_indices %}
-                    <th class="center aligned">{{ index }}</th>
-                {% endfor %}
-                    <th class="center aligned dots">. . .</th>
-                {% for index in end_indices %}
-                    <th class="center aligned">{{ index }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                {% for data in start_data %}
-                    <td class="center aligned">{{ data }}</td>
-                {% endfor %}
-                    <td class="center aligned dots">. . .</td>
-                {% for data in end_data %}
-                    <td class="center aligned">{{ data }}</td>
-                {% endfor %}
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<div class="title2">Want to find out more? Here is the data summary!</div>
-
-<div class="table-container">
-    <table class="ui celled definition teal table" style="width: 25%; margin-bottom: 60px;">
-        <thead>
-        </thead>
-        <tbody>
-            {% for key, value in summary.items %}
-                <tr>
-                    <td class="center aligned row-title">{{ key }}</td>
-                    <td class="center aligned">{{ value|floatformat:2 }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div> -->
 
 <div id="model-btn">
     <a class="ui button" href="{% url 'tsa_model' %}" onclick="set_loading(this)">

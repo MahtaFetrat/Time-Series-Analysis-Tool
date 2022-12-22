@@ -10,6 +10,8 @@
 }
 
 #plot {
+    display: flex;
+    justify-content: center;
     height: 260pt;
 }
 
