@@ -13,10 +13,11 @@ from statsmodels.tsa.stattools import adfuller
 
 def get_start_end_points_dict(data, count):
     start_end_points = {}
+    count = min(count, len(data) // 2 - 1)
     
     start_end_points['start_indices'] = range(1, count + 1)
     start_end_points['start_data'] = data[:count]
-    start_end_points['end_indices'] = range(len(data) - count, len(data))
+    start_end_points['end_indices'] = range(len(data) - count + 1, len(data) + 1)
     start_end_points['end_data'] = data[-count:]
 
     return start_end_points
