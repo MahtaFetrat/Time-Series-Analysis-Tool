@@ -9,6 +9,18 @@
     };
 </script>
 
+{% if not title %}
+
+<div class="title3">You must upload a dataset first!</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'index' %}">
+        Back to Home Page
+    </a>
+</div>
+
+{% else %}
+
 <div class="title">Visualizing the "{{ title|truncatechars:20 }}" Dataset!</div>
 
 <div id="plot">
@@ -54,7 +66,7 @@
             {% for key, value in summary.items %}
                 <tr>
                     <td class="center aligned row-title">{{ key }}</td>
-                    <td class="center aligned">{{ value }}</td>
+                    <td class="center aligned">{{ value|floatformat:2 }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -62,8 +74,10 @@
 </div>
 
 <div id="model-btn">
-    <a class="ui button" href="{% url 'tsa_model' %}" onclick="set_loading(this)">
-        Create Time Series Analysis Model
+    <a class="ui button" href="{% url 'preprocess' %}" onclick="set_loading(this)">
+        View Data Preprocessing
     </a>
     <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>
 </div>
+
+{% endif %}

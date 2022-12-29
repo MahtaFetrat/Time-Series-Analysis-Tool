@@ -1,0 +1,76 @@
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/diagnostics.css' %}">
+
+{% if not title %}
+
+<div class="title3">You must upload a dataset first!</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'index' %}">
+        Back to Home Page
+    </a>
+</div>
+
+{% elif not summary %}
+
+<div class="title3">You must create a model first!</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'tsa_model' %}">
+        Back to Model Page
+    </a>
+</div>
+
+{% else %}
+
+<div class="title">Evaluating the TSA Model Built for the "{{ title|truncatechars:20 }}" Dataset!</div>
+
+<div class="title2">You can see the residuals summary here!</div>
+
+<div class="table-container">
+    <table class="ui celled definition teal table" style="width: 25%; margin-bottom: 60px;">
+        <thead>
+        </thead>
+        <tbody>
+            {% for key, value in summary.items %}
+                <tr>
+                    <td class="center aligned row-title">{{ key }}</td>
+                    <td class="center aligned">{{ value | floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="title2">You can see the ACF plot of the residuals here!</div>
+
+<div id="plot">
+    {{ acf_plot | safe }}
+</div>
+
+<div class="title2">You can see the density plot of the residuals here!</div>
+
+<div id="plot">
+    {{ error_density_plot | safe }}
+</div>
+
+<div class="title2">You can see the result of the Ljung-box test here!</div>
+
+<div id="output-container">
+    <div id="output">
+        pvalues: {{ pvalues }}
+        </br>
+        result: <span style="color: {%if independence == 'Indepentend' %} red {% else %} lime {% endif %};">{{ independence }}</span>
+    </div>
+</div>
+
+<div class="title2">Thank you for using the TSA Analysis Tool :)</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'index' %}">
+        Back to Home Page
+    </a>
+</div>
+
+{% endif %}

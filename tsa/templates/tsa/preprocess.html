@@ -1,0 +1,53 @@
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/preprocess.css' %}">
+
+<script>
+    function set_loading(event) {
+        event.classList.add('loading', 'disabled');
+        document.getElementById('loading-text').style.visibility = "visible";
+    };
+</script>
+
+{% if not title %}
+
+<div class="title3">You must upload a dataset first!</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'index' %}">
+        Back to Home Page
+    </a>
+</div>
+
+{% else %}
+
+<div class="title">View Preprocessing Steps on the "{{ title|truncatechars:20 }}" Dataset!</div>
+
+<div class="title2">You can see some useful stationarity checks on the data bellow!</div>
+
+{% for plot, test_output, test_res in stationarity_checks %}
+    <div id="plot">
+        {{ plot|safe }}
+    </div>
+    <div id="output-container">
+        <div id="output">
+            {{ test_output | linebreaks }}
+            <div style="color: {%if test_res == 'Stationary' %} lime {% else %} red {% endif %};">{{ test_res }}</div>
+        </div>
+    </div>
+{% endfor %}
+
+<div class="title2">You can see the ACF and PACF plots of the differenced data here!</div>
+
+<div id="plot">
+    {{ acf_pacf | safe }}
+</div>
+
+<div id="model-btn">
+    <a class="ui button" href="{% url 'tsa_model' %}" onclick="set_loading(this)">
+        Create Time Series Analysis Model
+    </a>
+    <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>
+</div>
+
+{% endif %}

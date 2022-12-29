@@ -2,14 +2,8 @@ from django.views.generic.edit import FormView
 from django.views.generic.base import TemplateView
 from tsa.forms import UploadFileForm
 import pandas as pd
-import matplotlib.pyplot as plt
-from io import StringIO
-import numpy as np
-from pmdarima.arima import auto_arima
-from statsmodels.tsa.arima.model import ARIMA
+from tsa.serivces import get_data_plot_image, get_auto_arima_model, get_prediction_plot_image, get_start_end_points_dict, get_actual_prediction_data_dict, get_model_acf_plot_image, get_model_error_density_plot_image, get_model_normality_test, get_stationarity_check_series, get_acf_pacf_plot_image
 
-
-# Create your views here.
 
 class IndexView(FormView):
     template_name = 'tsa/index.html'
@@ -17,130 +11,84 @@ class IndexView(FormView):
     success_url = 'visualization/'
 
     def form_valid(self, form):
-        print(self.request.FILES['file'])
         df = pd.read_csv(self.request.FILES['file'])
         self.request.session['title'] = form.cleaned_data['title']
-        self.request.session['data'] = df.iloc[:, 0].tolist()
+        self.request.session['data-points'] = df.iloc[:, 0].tolist()
         return super().form_valid(form)
 
 
 class VisualizationView(TemplateView):
-    # TODO: threading
-    # TODO: separate service
-
     PREVIEW_COUNT = 8
     template_name = "tsa/visualization.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        self.set_context_datapoints(context)
-        self.set_context_summary(context)
-        self.set_context_plot(context)
-        context['title'] = self.request.session['title']
+        context['title'] = self.request.session.get('title', None)
+        if not context['title']:
+            return context
+        
+        data = pd.Series(self.request.session.get('data-points'))
+        context.update(get_start_end_points_dict(data, self.PREVIEW_COUNT))
+        context['summary'] = data.describe().to_dict()
+        context['plot'] = get_data_plot_image(data)
         
         return context
 
-    def set_context_datapoints(self, context):
-        data = self.request.session.get('data')
 
-        context['start_indices'] = range(1, self.PREVIEW_COUNT + 1)
-        context['start_data'] = data[:self.PREVIEW_COUNT]
-        context['end_indices'] = range(len(data) - self.PREVIEW_COUNT, len(data))
-        context['end_data'] = data[-self.PREVIEW_COUNT:]
-    
-    def set_context_summary(self, context):
-        data = pd.Series(self.request.session.get('data'))
-        summary = data.describe().to_dict()
-        summary = {k: round(v, 2) for k, v in summary.items()}
-        context['summary'] = summary
-
-    def set_context_plot(self, context):
-        data = pd.Series(self.request.session.get('data'))
-
-        fig, ax = plt.subplots(1, figsize=(15, 4))
-        lenght = len(data)
-        ax.plot(np.arange(lenght), data, c=np.random.choice(['olive', 'hotpink', 'turquoise', 'firebrick', 'navy', 'goldenrod']))
-        ax.set_xticks(data.index)
-        ax.set_xlabel("Time Steps")
-        ax.set_ylabel("Value")
-        ax.set_title("TIme Series Plot")
-
-        image_file = StringIO()
-        fig.savefig(image_file, format='svg')
-        image_file.seek(0)
-        context['plot'] = image_file.getvalue()
-
-
-class TSAModelView(TemplateView):
-    # TODO: threading
-    # TODO: separate service
-    # TODO: refactor :)
-
-    template_name = "tsa/model.html"
+class PreprocessingView(TemplateView):
+    template_name = "tsa/preprocess.html"
+    LAG_NUMBER = 20
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        y = self.request.session.get('data')
+        context['title'] = self.request.session.get('title', None)
+        if not context['title']:
+            return context
 
-        model, search_output = self.get_auto_arima_model(y)
-        self.set_contex_prediction_plot(y, model, context)
-        self.set_context_search_result(search_output, context)
+        data = self.request.session.get('data-points')
+        stationarity_checks, differenced_data = get_stationarity_check_series(data)
+        context["stationarity_checks"] = stationarity_checks
+        context["acf_pacf"] = get_acf_pacf_plot_image(differenced_data, self.LAG_NUMBER)
         return context
-        
-    def get_auto_arima_model(self, y):
-        import sys
-        stdout = sys.stdout
-        temp_out = StringIO()
-        sys.stdout = temp_out
 
-        auto_arima_model = auto_arima(
-            y, 
-            start_p=0,
-            start_q=0,
-            max_p=10,
-            max_q=10,
-            max_d=10,
-            trace=True,
-            test='adf',
-            error_action='ignore',
-            suppress_warnings=True,
-            seasonal=False,
-            stepwise=False
-        )
 
-        sys.stdout = stdout
-        temp_out.seek(0)
-        search_output = temp_out.read()
+class TSAModelView(TemplateView):
+    template_name = "tsa/model.html"
+    ACTUAL_PREVIEW_COUNT = 8
+    PREDICTION_PREVIEW_COUT = 5
 
-        model = ARIMA(y, order=auto_arima_model.get_params()['order']).fit()
-        return model, search_output
-        
-    
-    def set_contex_prediction_plot(self, y, model, context):
-        NUM_OF_FORECASTS = 5
-        
-        lenght = len(y)
-        predictions = model.predict(1, lenght + NUM_OF_FORECASTS - 1)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.request.session.get('title', None)
+        if not context['title']:
+            return context
 
-        conf = model.get_forecast(NUM_OF_FORECASTS - 1).conf_int(alpha=0.05)
-        conf = np.insert(conf, 0, np.array([predictions[lenght - 1], predictions[lenght - 1]]), 0)
+        data = self.request.session.get('data-points')
 
-        forecast_index = np.arange(lenght - 1, lenght + NUM_OF_FORECASTS - 1)
-        lower_series = pd.Series(conf[:, 0], index=forecast_index)
-        upper_series = pd.Series(conf[:, 1], index=forecast_index)
-
-        fig, ax = plt.subplots(1, figsize=(15,4))
-
-        ax.plot(y, label='Actual')
-        ax.plot(predictions, label='Predictions')
-        ax.fill_between(lower_series.index, lower_series, upper_series, color='k', alpha=.15)
-        ax.set_title('Predictions vs Actuals')
-        ax.legend(loc="upper left")
-
-        image_file = StringIO()
-        fig.savefig(image_file, format='svg')
-        image_file.seek(0)
-        context['prediction_plot'] = image_file.getvalue()
-
-    def set_context_search_result(self, search_output, context):
+        model, search_output = get_auto_arima_model(data)
+        self.request.session['residuals'] = list(model.resid)
         context['search_output'] = search_output
+        context['prediction_plot'] = get_prediction_plot_image(data, model)
+        context.update(get_actual_prediction_data_dict(data, model, self.ACTUAL_PREVIEW_COUNT, self.PREDICTION_PREVIEW_COUT))
+        return context
+
+
+class ModelDiagnosticsView(TemplateView):
+    template_name = "tsa/diagnostics.html"
+    LAG_NUMBER = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.request.session.get('title', None)
+        if not context['title']:
+            return context
+            
+        if 'residuals' not in self.request.session:
+            return context
+
+        residuals = pd.Series(self.request.session.get('residuals'))
+        context["summary"] = residuals.describe().to_dict()
+        context["acf_plot"] = get_model_acf_plot_image(residuals, self.LAG_NUMBER)
+        context["error_density_plot"] = get_model_error_density_plot_image(residuals)
+        context.update(get_model_normality_test(residuals))
+        return context
