@@ -11,7 +11,7 @@ class IndexView(FormView):
     success_url = 'visualization/'
 
     def form_valid(self, form):
-        df = pd.read_csv(self.request.FILES['file'])
+        df = pd.read_csv(self.request.FILES['file'], header=None)
         self.request.session['title'] = form.cleaned_data['title']
         self.request.session['data-points'] = df.iloc[:, 0].tolist()
         return super().form_valid(form)
