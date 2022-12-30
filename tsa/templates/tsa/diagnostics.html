@@ -2,6 +2,21 @@
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/semantic.css' %}">
 <link type="text/css" rel="stylesheet" href="{% static 'tsa/styles/diagnostics.css' %}">
 
+<style>
+    .title {
+        font-size: 4em;
+        text-align: center;
+        font-weight: bolder;
+        padding-top: 80px;
+        padding-bottom: 80px;
+        margin-bottom: 40px;
+        background-color: rgb(0, 86, 86);
+        color: white;
+        background-image: url({% static 'tsa/images/index-bg.gif' %});
+        background-size: cover;
+    }
+</style>
+
 {% if not title %}
 
 <div class="title3">You must upload a dataset first!</div>
