@@ -39,7 +39,7 @@
 <div class="title">Visualizing the "{{ title|truncatechars:20 }}" Dataset!</div>
 
 <div id="plot">
-    {{ plot|safe }}
+    <img src="{{ plot }}">
 </div>
 
 <div class="title2">You can see a few starting and ending data points here!</div>
@@ -89,7 +89,7 @@
 </div>
 
 <div id="model-btn">
-    <a class="ui button" href="{% url 'preprocess' %}" onclick="set_loading(this)">
+    <a class="ui button" href="{% url 'preprocess' tsa_id=id %}" onclick="set_loading(this)">
         View Data Preprocessing
     </a>
     <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>

@@ -10,11 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -25,8 +25,12 @@ SECRET_KEY = 'django-insecure-=)p0%cf^#vnm@rfdpk-1e891*g%b%4wx2k+bky7jk=+-cvc*8&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0'
+]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
@@ -70,17 +74,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tsa_tool.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "tsa",
+        "USER": "postgres",
+        "HOST": "db",
+        "PORT": "5432",
+        "PASSWORD": "1",
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -100,7 +106,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -112,14 +117,35 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = ''
 
+STATIC_ROOT = os.getenv('STATIC_ROOT', os.path.join(BASE_DIR, "static"))
+# STATIC_URL = os.getenv("STATIC_URL", f"http://localhost:8000/static/")
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# S3 Configs
+S3_HOST_SCHEME = os.getenv('S3_HOST_SCHEME', 'http://')
+S3_HOST = os.getenv('S3_HOST', 'minioserver:9000')
+S3_ACCESS_KEY = os.getenv('S3_ACCESS_KEY', 'minio_access')
+S3_SECRET_KEY = os.getenv('S3_SECRET_KEY', 'minio_secret')
+S3_SECURE = bool(os.getenv('S3_SECURE', ''))
+
+# DJANGO_STORAGES
+AWS_ACCESS_KEY_ID = S3_ACCESS_KEY
+AWS_SECRET_ACCESS_KEY = S3_SECRET_KEY
+AWS_STORAGE_BUCKET_NAME = 'pics'
+AWS_S3_URL_PROTOCOL = S3_HOST_SCHEME.split('//')[0]
+AWS_S3_ENDPOINT_URL = S3_HOST_SCHEME + S3_HOST
+AWS_S3_SECURE_URLS = AWS_S3_ENDPOINT_URL == 'https:'
+AWS_DEFAULT_ACL = 'public-read'
+
+
+FILES_DIRS = (
+    os.path.join(os.path.dirname(BASE_DIR), "template"),
+)
