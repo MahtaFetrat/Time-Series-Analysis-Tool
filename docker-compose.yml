@@ -43,8 +43,6 @@ services:
       - .:/opt/Time-Series-Analysis-Tool
     environment:
       MINIO_SERVER_HOST: minioserver
-    env_file:
-      - .env
     stdin_open: true
     tty: true
     command: >
