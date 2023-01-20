@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_DB: tsa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1"
+    volumes:
+      - database:/var/lib/postgresql/data
+  minioserver:
+    image: docker.repos.balad.ir/minio/minio:RELEASE.2020-07-11T21-14-23Z
+    environment:
+      MINIO_ACCESS_KEY: minio_access
+      MINIO_SECRET_KEY: minio_secret
+    volumes:
+      - miniodata:/data
+    ports:
+      - 9000:9000
+    command: server /data
+  minioclient:
+    image: registry.cafebazaar.ir:5000/map/common-images/minioclient
+    depends_on:
+      - minioserver
+    # Look at https://github.com/ufoscout/docker-compose-wait for WAIT_HOSTS
+    # and WAIT_AFTER_HOSTS environment variables usage
+    environment:
+      WAIT_HOSTS: minioserver:9000
+      WAIT_AFTER_HOSTS: 5
+      MINIO_ACCESS_KEY: minio_access
+      MINIO_SECRET_KEY: minio_secret
+    entrypoint: sh
+    command: >
+      -c "/wait && mc config host add tsa http://minioserver:9000 $$MINIO_ACCESS_KEY $$MINIO_SECRET_KEY &&
+          mc mb -p tsa/pics &&
+          mc policy set download tsa/pics"
+  webapp:
+    build:
+      context: "."
+    working_dir: /opt/Time-Series-Analysis-Tool
+    volumes:
+      - .:/opt/Time-Series-Analysis-Tool
+    environment:
+      MINIO_SERVER_HOST: minioserver
+    stdin_open: true
+    tty: true
+    command: >
+      /bin/bash -c "
+        python3 manage.py collectstatic --noinput &&
+        python3 manage.py migrate &&
+        python3 manage.py runserver 0.0.0.0:8000
+      "
+  nginx:
+    image: nginx:1.17.10-alpine
+    volumes:
+      - ./configs/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./static:/static
+    ports:
+      - 8000:80
+
+
+volumes:
+  database:
+  miniodata:

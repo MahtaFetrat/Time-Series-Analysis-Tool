@@ -42,7 +42,7 @@
 
 {% for plot, test_output, test_res in stationarity_checks %}
     <div id="plot">
-        {{ plot|safe }}
+        <img src="{{ plot }}">
     </div>
     <div id="output-container">
         <div id="output">
@@ -55,11 +55,11 @@
 <div class="title2">You can see the ACF and PACF plots of the differenced data here!</div>
 
 <div id="plot">
-    {{ acf_pacf | safe }}
+    <img src="{{ acf_pacf }}">
 </div>
 
 <div id="model-btn">
-    <a class="ui button" href="{% url 'tsa_model' %}" onclick="set_loading(this)">
+    <a class="ui button" href="{% url 'tsa_model' tsa_id=id %}" onclick="set_loading(this)">
         Create Time Series Analysis Model
     </a>
     <div id="loading-text" style="visibility: hidden; color: grey; margin-top: 1em;">Please wait while we are processing the data...</div>

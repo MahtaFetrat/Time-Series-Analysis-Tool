@@ -32,7 +32,7 @@
 <div class="title3">You must create a model first!</div>
 
 <div id="model-btn">
-    <a class="ui button" href="{% url 'tsa_model' %}">
+    <a class="ui button" href="{% url 'tsa_model' tsa_id=id %}">
         Back to Model Page
     </a>
 </div>
@@ -61,13 +61,13 @@
 <div class="title2">You can see the ACF plot of the residuals here!</div>
 
 <div id="plot">
-    {{ acf_plot | safe }}
+    <img src="{{ acf_plot }}">
 </div>
 
 <div class="title2">You can see the density plot of the residuals here!</div>
 
 <div id="plot">
-    {{ error_density_plot | safe }}
+    <img src="{{ error_density_plot }}">
 </div>
 
 <div class="title2">You can see the result of the Ljung-box test here!</div>
